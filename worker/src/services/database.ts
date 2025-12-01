@@ -193,8 +193,10 @@ export async function getGptModels(
     params.push(options.creatorId);
   }
   
-  const sortBy = options.sortBy || 'created_at';
-  const sortOrder = options.sortOrder || 'desc';
+  // Validate sortBy against allowed columns to prevent SQL injection
+  const allowedSortColumns = ['created_at', 'updated_at', 'name', 'total_rentals', 'average_rating', 'total_revenue'];
+  const sortBy = allowedSortColumns.includes(options.sortBy || '') ? options.sortBy : 'created_at';
+  const sortOrder = options.sortOrder === 'asc' ? 'asc' : 'desc';
   query += ` ORDER BY ${sortBy} ${sortOrder}`;
   
   const limit = options.limit || 20;

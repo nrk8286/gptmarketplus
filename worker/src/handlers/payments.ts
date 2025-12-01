@@ -110,18 +110,24 @@ export async function handleAddFunds(
       return errorResponse('Maximum deposit is $10,000', 400);
     }
 
-    // In production, this would integrate with Stripe to process the payment
-    // For now, we'll simulate a successful payment
-
-    // Create payment record
+    // TODO: Integrate with Stripe for production payments
+    // This endpoint currently simulates payment success for development/testing.
+    // Production implementation requires:
+    // 1. Create Stripe PaymentIntent with amount
+    // 2. Return client_secret to frontend
+    // 3. Handle payment confirmation via Stripe webhook
+    // 4. Update payment status and wallet balance in webhook handler
+    
+    // Create payment record (pending until Stripe confirms)
     const paymentId = await createPayment(ctx.env.DB, {
       userId: ctx.user.id,
       amount,
       description: 'Wallet deposit',
-      metadata: { type: 'deposit' },
+      metadata: { type: 'deposit', note: 'Development mode - auto-approved' },
     });
 
-    // Mark payment as succeeded (in production, this would happen via webhook)
+    // DEVELOPMENT ONLY: Auto-approve payment
+    // In production, this would happen via Stripe webhook after payment confirmation
     await ctx.env.DB.prepare(`
       UPDATE payments SET status = 'succeeded' WHERE id = ?
     `).bind(paymentId).run();

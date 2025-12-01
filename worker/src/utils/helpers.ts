@@ -50,20 +50,52 @@ export function successResponse<T>(
   );
 }
 
-export async function hashPassword(password: string): Promise<string> {
+export async function hashPassword(password: string, salt?: string): Promise<string> {
+  // Generate a random salt if not provided
+  const actualSalt = salt || crypto.randomUUID();
   const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  
+  // Combine password and salt
+  const combined = `${actualSalt}:${password}`;
+  
+  // Perform multiple rounds of hashing for key stretching
+  let data = encoder.encode(combined);
+  for (let i = 0; i < 10000; i++) {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    data = new Uint8Array(hashBuffer);
+  }
+  
+  const hashArray = Array.from(data);
+  const hash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  
+  // Return salt:hash format so we can verify later
+  return `${actualSalt}:${hash}`;
 }
 
 export async function verifyPassword(
   password: string,
-  hash: string
+  storedHash: string
 ): Promise<boolean> {
-  const passwordHash = await hashPassword(password);
-  return passwordHash === hash;
+  // Extract salt from stored hash
+  const [salt] = storedHash.split(':');
+  if (!salt) {
+    return false;
+  }
+  
+  // Hash the provided password with the same salt
+  const newHash = await hashPassword(password, salt);
+  
+  // Constant-time comparison to prevent timing attacks
+  if (newHash.length !== storedHash.length) {
+    return false;
+  }
+  
+  let result = 0;
+  for (let i = 0; i < newHash.length; i++) {
+    result |= newHash.charCodeAt(i) ^ storedHash.charCodeAt(i);
+  }
+  
+  return result === 0;
 }
 
 export function parseQueryParams(url: URL): Record<string, string> {

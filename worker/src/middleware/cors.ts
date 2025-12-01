@@ -15,9 +15,8 @@ export function getCorsHeaders(request: Request, env: Env): Headers {
   // Check if origin is allowed
   if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
     headers.set('Access-Control-Allow-Origin', origin);
-  } else if (allowedOrigins.length > 0) {
-    headers.set('Access-Control-Allow-Origin', allowedOrigins[0]);
   }
+  // If origin is not allowed, don't set any CORS headers - request will fail CORS check
 
   headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-ID');

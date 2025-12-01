@@ -418,7 +418,8 @@ CREATE TABLE IF NOT EXISTS api_rate_limits (
     endpoint TEXT NOT NULL,
     window_start TEXT NOT NULL,
     request_count INTEGER DEFAULT 1,
-    created_at TEXT DEFAULT (datetime('now'))
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(identifier, endpoint, window_start)
 );
 
 -- 27. Platform settings

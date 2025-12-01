@@ -359,8 +359,15 @@ export async function handlePlaceTrade(
       WHERE id = ?
     `).bind(amount, marketId).run();
 
-    // Update outcome price (simplified AMM)
-    const newPrice = Math.min(0.99, Math.max(0.01, currentPrice + (tradeType === 'buy' ? 0.01 : -0.01) * shares));
+    // Update outcome price using Constant Product AMM formula (similar to Uniswap)
+    // This prevents manipulation by making larger trades have more price impact
+    const totalShares = (outcome.total_shares as number) || 1000; // Base liquidity
+    const k = totalShares * currentPrice; // Constant product
+    const newShares = totalShares + (tradeType === 'buy' ? shares : -shares);
+    const rawNewPrice = k / Math.max(newShares, 1);
+    // Clamp price between 0.01 and 0.99 to ensure valid probability range
+    const newPrice = Math.min(0.99, Math.max(0.01, rawNewPrice));
+    
     await ctx.env.DB.prepare(`
       UPDATE market_outcomes 
       SET current_price = ?, probability = ?, total_shares = total_shares + ?
