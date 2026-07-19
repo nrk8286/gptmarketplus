@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - 'pages/**'
+      - '.github/workflows/deploy-pages.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'pages/**'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -29,6 +36,10 @@ jobs:
         working-directory: pages
         run: npm ci
 
+      - name: Audit production dependencies
+        working-directory: pages
+        run: npm audit --omit=dev --audit-level=high
+
       - name: TypeScript check
         working-directory: pages
         run: npm run typecheck
@@ -44,6 +55,7 @@ jobs:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - name: Deploy to Cloudflare Pages
+        if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
