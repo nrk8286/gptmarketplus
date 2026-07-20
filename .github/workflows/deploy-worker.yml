@@ -1,4 +1,4 @@
-name: Deploy Worker
+name: Verify Legacy Worker
 
 on:
   push:
@@ -6,15 +6,22 @@ on:
       - main
     paths:
       - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
+  verify:
     runs-on: ubuntu-latest
-    name: Deploy Worker
+    name: Verify Worker
     steps:
       - uses: actions/checkout@v4
 
@@ -29,6 +36,10 @@ jobs:
         working-directory: worker
         run: npm ci
 
+      - name: Audit production dependencies
+        working-directory: worker
+        run: npm audit --omit=dev --audit-level=high
+
       - name: TypeScript check
         working-directory: worker
         run: npm run typecheck
@@ -37,8 +48,11 @@ jobs:
         working-directory: worker
         run: npm run lint
 
-      - name: Deploy to Cloudflare Workers
+      - name: Test
         working-directory: worker
-        run: npx wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npm test -- --passWithNoTests
+
+      - name: Explain deployment status
+        run: |
+          echo "Deployment is intentionally disabled while worker/wrangler.toml contains placeholder resource IDs."
+          echo "Provision the D1 and KV resources, replace every placeholder, and review the service against the active production Worker before restoring deploy permissions."
