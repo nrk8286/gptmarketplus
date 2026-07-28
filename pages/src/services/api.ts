@@ -4,21 +4,26 @@ import type { ApiResponse } from '../types';
 
 const API_BASE_URL = '/api/v1';
 
-class ApiService {
+function getBrowserStorage(): Storage | null {
+  return typeof localStorage === 'undefined' ? null : localStorage;
+}
+
+export class ApiService {
   private baseUrl: string;
   private token: string | null = null;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
-    this.token = localStorage.getItem('auth_token');
+    this.token = getBrowserStorage()?.getItem('auth_token') ?? null;
   }
 
   setToken(token: string | null): void {
     this.token = token;
+    const storage = getBrowserStorage();
     if (token) {
-      localStorage.setItem('auth_token', token);
+      storage?.setItem('auth_token', token);
     } else {
-      localStorage.removeItem('auth_token');
+      storage?.removeItem('auth_token');
     }
   }
 
