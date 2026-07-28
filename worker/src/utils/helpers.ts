@@ -109,8 +109,12 @@ export function parseQueryParams(url: URL): Record<string, string> {
 export function getPaginationParams(
   params: Record<string, string>
 ): { page: number; limit: number; offset: number } {
-  const page = Math.max(1, parseInt(params.page || '1', 10));
-  const limit = Math.min(100, Math.max(1, parseInt(params.limit || '20', 10)));
+  const parsedPage = Number.parseInt(params.page || '1', 10);
+  const parsedLimit = Number.parseInt(params.limit || '20', 10);
+  const page = Number.isFinite(parsedPage) ? Math.max(1, parsedPage) : 1;
+  const limit = Number.isFinite(parsedLimit)
+    ? Math.min(100, Math.max(1, parsedLimit))
+    : 20;
   const offset = (page - 1) * limit;
   return { page, limit, offset };
 }
