@@ -11,16 +11,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "stripe": "^14.0.0"
+    "stripe": "^22.4.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260714.1",
-    "@types/node": "^20.10.0",
-    "eslint": "^8.57.1",
-    "@typescript-eslint/eslint-plugin": "^8.64.0",
+    "@cloudflare/workers-types": "^5.20260731.1",
+    "@types/node": "^26.1.2",
+    "eslint": "^10.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.64.0",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.10",
-    "wrangler": "^4.112.0"
+    "wrangler": "^4.117.0"
   }
 }
