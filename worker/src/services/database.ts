@@ -204,19 +204,12 @@ export async function getGptModels(
   query += ' LIMIT ? OFFSET ?';
   
   // Get count
-  let countStmt = db.prepare(countQuery);
-  for (let i = 0; i < params.length; i++) {
-    countStmt = countStmt.bind(params[i]);
-  }
+  const countStmt = db.prepare(countQuery).bind(...params);
   const countResult = await countStmt.first();
   const total = (countResult?.count as number) || 0;
   
   // Get models
-  let stmt = db.prepare(query);
-  for (let i = 0; i < params.length; i++) {
-    stmt = stmt.bind(params[i]);
-  }
-  stmt = stmt.bind(limit, offset);
+  const stmt = db.prepare(query).bind(...params, limit, offset);
   
   const result = await stmt.all();
   
@@ -467,19 +460,12 @@ export async function getPredictionMarkets(
   query += ' LIMIT ? OFFSET ?';
   
   // Get count
-  let countStmt = db.prepare(countQuery);
-  for (let i = 0; i < params.length; i++) {
-    countStmt = countStmt.bind(params[i]);
-  }
+  const countStmt = db.prepare(countQuery).bind(...params);
   const countResult = await countStmt.first();
   const total = (countResult?.count as number) || 0;
   
   // Get markets
-  let stmt = db.prepare(query);
-  for (let i = 0; i < params.length; i++) {
-    stmt = stmt.bind(params[i]);
-  }
-  stmt = stmt.bind(limit, offset);
+  const stmt = db.prepare(query).bind(...params, limit, offset);
   
   const result = await stmt.all();
   

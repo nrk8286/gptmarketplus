@@ -2,7 +2,7 @@
 
 import type { ApiResponse } from '../types';
 
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = (import.meta.env.VITE_API_URL?.trim() || '/api/v1').replace(/\/+$/, '');
 
 class ApiService {
   private baseUrl: string;
@@ -45,7 +45,16 @@ class ApiService {
         headers,
       });
 
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        throw new Error('The API returned an unexpected response. Please try again later.');
+      }
       const data = await response.json();
+      if (!data || typeof data.success !== 'boolean') {
+        throw new Error('The API returned an unexpected response. Please try again later.');
+      }
+      if (!response.ok) {
+        return { success: false, error: data.error || `Request failed (${response.status})` };
+      }
       return data as ApiResponse<T>;
     } catch (error) {
       return {

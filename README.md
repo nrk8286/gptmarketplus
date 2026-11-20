@@ -149,6 +149,19 @@ Build settings:
 - Build output directory: `dist`
 - Root directory: `pages`
 
+Set `VITE_API_URL` at build time to the deployed Worker's full API base URL,
+including `/api/v1` (for example, `https://your-worker.example/api/v1`). The GitHub
+Pages workflow reads this from the repository variable with the same name.
+The Worker `CORS_ORIGINS` setting must include the frontend's exact origin.
+If the variable is unset, requests use `/api/v1` on the frontend's origin;
+this requires an API proxy in production. Vite supplies that proxy only during
+local development. A static Pages deployment alone does not serve the API.
+
+The resource IDs in `worker/wrangler.toml` are placeholders. Replace them with
+the intended D1 and KV IDs before deploying, apply `database/schema.sql` to that
+database, and configure the Worker secrets above. Verify `/api/v1/models` returns
+JSON from D1, not just a successful static page or the liveness endpoint.
+
 ## API Endpoints
 
 ### Authentication
